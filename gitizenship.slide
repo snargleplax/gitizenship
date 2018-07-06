@@ -1,0 +1,270 @@
+The snargleplax guide to good gitizenship
+
+Luke Meyers
+Senior Software Engineer, RADAR
+luke@radarfirst.com
+https://github.com/snargleplax/
+
+
+
+* Scope and motivation
+
+* Theme: do simple, complete things
+
+This theme runs through modularity of design, TDD, and version control. They reinforce one another, and provide benefits in all cases for similar reasons. This _is_ the management of complexity — which is to say, *that's*the*job*.
+
+So how do we apply this to version control with Git?
+
+* What we'll cover
+
+Conceptual approaches to working effectively with Git, and reasons to do so.
+
+Not so much details of Git commands.
+
+: Plan to offer separate demo to cover tactical implementation of these ideas.
+
+* Desiderata
+
+- Manage complex work effectively
+- Ease review
+- Maintain comprehensible version history
+- Avoid merge mess
+- Serve team and future self with agile commits
+: Agile commits can be worked with, `cherry-pick`-ed, reordered with `rebase`-i`, etc.
+- Help Git serve you better
+
+* Standards
+
+Every commit merged to `master` should:
+
+- Build
+- Pass all the tests
+- Minimally express one idea of change
+- Have an accurate commit message
+- Help tell a story
+
+Stretch goals:
+
+- Not add tech debt
+- Uphold test coverage (include unit tests with functionality)
+
+: `master` as a history of stuff that works at any point
+: Consider standards for major open source projects, and why they have to insist on things like this.
+: Perfect vs. good
+
+
+* Antipatterns
+
+: Not to focus on the negatives first, but let's motivate some of the solutions we'll be discussing.
+
+* Antipattern: broken commits
+
+- Build fails
+- Tests don't all pass
+
+: Hard for reviewers
+: Less agile commits harder to work with
+: Let's discuss why this happens -- what's going on with process and/or design that makes it seem inconvenient to produce working commits?
+
+* Antipattern: lies, damned lies, and commit messages
+
+Inaccurate commit messages inhibit comprehension for review, integration, and investigation of branch history.
+
+- Misrepresentation
+: Misrepresentation: "refactor" that changes behavior
+- Omissions
+: Omissions: tossed-in stuff not mentioned
+- Vagueness
+: Vagueness: "fix impl". What impl? What was broken? What was the fix?
+- Context-dependence
+: Context-dependence: "Respond to PR feedback"
+
+* Antipattern: fish soup
+
+"It is easy to make fish soup out of an aquarium, but no one has yet found a way to make an aquarium out of fish soup." — Mikhail Zhvanetsky
+
+Commits that do too much are harder to understand and work with, and often involve difficult-to-read diffs.
+
+- Many changes in one commit
+- Mixing refactoring with behavioral changes
+- "Toss-ins" — fixups included with other large changes
+- Mixing large code movement with smaller changes
+
+* Antipattern: Requiring reviewer cross-referencing
+
+1. Make mistake in commit A
+
+2. Make more commits
+
+3. Notice mistake, fix it in commit B
+
+4. Submit PR
+
+5. Reviewer notices mistake in commit A; has to cross-reference to full diff, or notice fix in commit B, to decide whether something needs to be pointed out.
+
+: GitHub's poor handling of per-commit comments makes this even more troublesome.
+
+* Antipattern: changing history in the wrong situation
+
+Don't change _shared_ history.
+
+Do change _private_ history, with care.
+
+Use your fork.
+
+: Don't sacrifice GitHub's utility as a repo mirror just because your work's not ready to share. Use your personal fork of the shared repo as a push target until you're ready to put stuff up for review. That way, you can revise history freely and benefit from offsite backup.
+
+
+* Happy little commits
+
+* Happy little commits: commit early, commit often
+
+- It's easier to squash things together than pull them apart (fish soup); start fine-grained, then combine as useful
+- Small commits for fixups and other stuff you plan to reshuffle/squash later (or even revert!)
+- Cost of too-small commit: negligible. Cost of too-large commit: appreciable.
+
+: Why to combine commits? To tell a simpler, more cohesive story.
+: Small fixup commits provide great opportunities to develop comfort with interactive rebasing.
+
+* Happy little commits: completeness
+
+- Builds
+- Tests pass
+- Does what it says on the tin
+
+: a.k.a. includes what's described by the commit message
+
+* Happy little commits: cohesion
+
+Minimally express one idea of change.
+
+Examples:
+
+- Add a new chunk of code
+- Refactor an area of existing code
+- Modify behavior of existing code
+- Move (or delete) a big chunk of code
+- Make one small change in a bunch of files
+- Revendor a package, and fix up usage of it
+- Change/add/delete codegen inputs, and re-generate output
+
+: Large adds are fine, if they don't involve a bunch of edits as well.
+
+* Happy little commits: let constraints guide workflow
+
+Consider module dependencies; how do I build it one small piece at a time without breaking it?
+
+Useful approaches include:
+
+- Define (and review) interfaces, documentation, acceptance tests first
+- Bottom-up (work your way up the dependency graph)
+- TDD; one commit per test
+- Keep an external TODO list so you don't lose track of things and can focus on one at a time.
+
+
+* Optimize for review
+
+* Optimize for review: write helpful commit messages
+
+- Concise summary (50 char limit)
+- Imperative voice
+- Describe the change, not the situation in which you're making it
+- Sensible when considered in isolation
+- Fuller text beyond summary is often helpful
+
+: Imperative voice is concise and easy to be consistent with.
+: If you're having _too_ much to say, is it a cohesive commit?
+
+* Optimize for review: inspect what you commit
+
+Don't just `git`commit`-a` and `git`push`. Stop and look.
+
+Inspect what you're committing (before asking someone else to!). You'll get a better review out of it, by catching distractions you can remove on your own.
+
+Give it all another once-over right before you submit the PR.
+
+* Optimize for review: be a reviewer
+
+Review other people's code often, so you feel the same pain points.
+
+Review all-at-once and commit-by-commit, to get both experiences and establish preference (which may be situation-dependent; both are good tools). Notice what comes up for you along each kind of path.
+
+Consider how the narrative of your own changes can be consumed. Can they be understood all at once, or is it better to go through the commits sequentially? If they're meant to be understood all at once, note that a single cross-cutting change that touches a bunch of files can suffice to obscure the overall diff past the point of effective review.
+
+* Optimize for review: do pre-PR cleanup
+
+- Nix debug logs, commented code, stubs, etc.
+- Squash fixups (`git`rebase`-i`)
+- Collapse the meandering path you took to get there
+- Ensure everything builds and passes tests (e.g. `git`rebase`-x`go`test`./...`)
+- Do an "idiot walk"
+
+
+* Branch lifecycle
+
+* Branch lifecycle: phases
+
+1. Dev time
+2. Cleanup time
+3. Review time
+
+* Branch lifecycle: dev time
+
+Use Git to help you maintain forward momentum, while avoiding "fish soup."
+
+Many little commits, favor breaking things up so they're easy to reshuffle, etc.
+
+* Branch lifecycle: cleanup time
+
+Squash fixups, make commit order more natural based on lessons learned, etc.
+
+Can overlap/interlace some with dev time, but use care.
+
+* Branch lifecycle: review time
+
+Stop rebasing!
+
+* Branch lifecycle: feature branches
+
+When, and how
+
+
+* Sharp tools
+
+* Sharp tools: know your Git
+
+- If you use a git GUI, understand the command-line equivalents of the things it does for you.
+- `show-branch`
+- `commit`--amend`
+- `rebase`-i` (reorder, squash/fixup, edit)
+- `rebase`-x`
+- `add`-p`
+- `reset`-p`
+- Forks and `git`remote`
+
+* Sharp tools: rebase -i like the pro you are
+
+- Tiny steps
+- No, tinier!
+- Lots of tiny little conflict resolutions — pay attention to what they have to say
+- When in doubt, abort and reconsider
+
+
+* Parting thoughts
+
+* Parting thought: positive design impact
+
+Just as making code testable tends to act as a forcing function to improve its design, the work done to structure commits well can act as a forcing function to improve clarity around design, dependency management, separable chunks for release or independent (parallel?) work, etc.
+
+* Parting thought: source control as time travel
+
+When you realize that you wish you'd done a thing before the thing you're doing now — MAKE IT SO!
+
+Don't do the thing you wish you'd already done atop the thing that would have gone more smoothly if it was already in place. Revise history to happen in a more ideal order, driven by what you've learned about your dependencies.
+
+There's no reason that a reviewer, and the repo history, should have to go through the same "oh wait, I need this" thought process.
+
+* Parting thought: it won't be perfect
+
+It's okay. Try, practice, learn, and know when to stop.
+
